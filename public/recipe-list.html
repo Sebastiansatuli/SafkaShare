@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaikki Reseptit - SafkaShare</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Karla:400,700|Roboto" rel="stylesheet">
+    <link href="plugins/material/css/materialdesignicons.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet">
+    <!-- Add any additional CSS for sidebar and top nav if needed -->
+    <style>
+        .recipe-card-image {
+            max-width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: .25rem .25rem 0 0;
+        }
+    
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            min-width: 200px;
+        }
+    
+        .card-body {
+            text-align: center;
+        }
+    
+        /* Ensure the container doesn't exceed the max width but is centered */
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+    
+        #recipe-list .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+    
+        #recipe-list .col-md-4 {
+            display: flex;
+            flex: 1 0 33%; /* Default to three columns */
+            max-width: 33%; /* Default to three columns */
+        }
+    
+        @media (max-width: 768px) {
+            #recipe-list .col-md-4 {
+                flex-basis: 50%; /* Two columns for smaller screens */
+                max-width: 50%;
+            }
+        }
+    
+        @media (max-width: 576px) {
+            #recipe-list .col-md-4 {
+                flex-basis: 100%; /* Full width for extra small screens */
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="navbar-fixed sidebar-fixed" id="body">
+    <!-- Sidebar -->
+    <aside class="left-sidebar sidebar-dark" id="left-sidebar">
+        <!-- Copy the sidebar structure from index.html here -->
+    </aside>
+<!-- vasen navigointi content-->
+<div class="wrapper">
+      
+    <!-- ====================================
+      ——— LEFT SIDEBAR WITH OUT FOOTER
+    ===================================== -->
+    <aside class="left-sidebar sidebar-dark" id="left-sidebar">
+      <div id="sidebar" class="sidebar sidebar-with-footer">
+        <!-- Aplication Brand -->
+        <div class="app-brand">
+          <a href="/index.html">
+            <img src="images/logo.png" alt="Mono" class="sidebar-logo">
+            <span class="brand-name"></span>
+          </a>
+        </div>
+        <!-- begin sidebar scrollbar -->
+          <!-- sidebar menu -->
+          <ul class="nav sidebar-inner" id="sidebar-menu">
+            
+              <li>
+                <a class="sidenav-item-link" href="index.html">
+                  <i class="mdi mdi-briefcase-account-outline"></i>
+                  <span class="nav-text">Etusivu</span>
+                </a>
+              </li>
+              <li class="active">
+                <a class="sidenav-item-link" href="recipe-list.html">
+                  <i class="mdi mdi-food-variant"></i>
+                  <span class="nav-text">Hae reseptejä</span>
+                </a>
+              </li>
+
+              <li id="omatReseptit" class="hover-pointer">
+                <a class="sidenav-item-link">
+                  <i class="mdi mdi-food-apple"></i>
+                  <span class="nav-text">Omat reseptit</span>
+                </a>
+              </li>
+            
+                <ul  class="collapse"  id="email"
+                  data-parent="#sidebar-menu">
+                  <div class="sub-menu">
+                  </div>
+                </ul>
+              </li>
+      </div>
+    </aside>
+    <!-- Page Content -->
+    <div class="page-wrapper">
+           <!-- Header -->
+           <header class="main-header" id="header">
+            <nav class="navbar navbar-expand-lg navbar-light" id="navbar">
+              <!-- Sidebar toggle button -->
+              <button id="sidebar-toggler" class="sidebar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+              </button>
+
+              <span class="page-title">Reseptit</span>
+
+              <div class="navbar-right ">
+
+                <div>
+                  <form action="index.html" method="get">
+                    <div class="input-group input-group-sm" id="input-group-search">
+                   
+                    </div>
+                  </form>
+                </div>
+
+                <div class="navbar-right">
+                    <ul class="nav navbar-nav">
+                        <button class="button nav-link" style="visibility: hidden;" id="logoutButton" disabled="true">Kirjaudu ulos</button>
+                        <button class="button nav-link" id="loginButton">
+                            <span class="d-none d-lg-inline-block" id="userLabel">Kirjaudu sisään</span>
+                        </button>
+                    </ul>
+                    </li>
+                      <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+
+                        var storedName = sessionStorage.getItem('full_name');
+                        // Check if data exists
+                        if (storedName) {
+                            // Display the retrieved data on the page
+                            document.getElementById('loginButton').disabled = true;
+                            document.getElementById('loginButton').style="color: black;";
+                            document.getElementById('logoutButton').disabled = false;
+                            document.getElementById('logoutButton').style="visibility: visible; color: red;";
+                            document.getElementById('userLabel').textContent = storedName;
+                        } else {
+                            // If no data found in local storage
+                            document.getElementById('loginButton').disabled = false;
+                            document.getElementById('logoutButton').disabled = true;
+                            document.getElementById('logoutButton').style="visibility: hidden;";
+                            document.getElementById('userLabel').textContent = "Kirjaudu sisään";
+                        }
+                            const loginButton = document.getElementById('loginButton');
+                            loginButton.addEventListener('click', function() {
+                                window.location.href = 'login.html';
+                        });
+                        const logoutButton = document.getElementById('logoutButton');
+                        logoutButton.addEventListener('click', function() {
+                            sessionStorage.clear();
+                            window.location.href = 'index.html';
+                        });
+                        const omatReseptitButton = document.getElementById('omatReseptit');
+                        omatReseptitButton.addEventListener('click', function() {
+                            var storedName = sessionStorage.getItem('full_name');
+                            if (storedName) {
+                                window.location.href = 'user-recipes.html';
+                            } else {
+                                window.location.href = 'login.html';
+                            }
+                                
+                        });
+                    });
+                    </script>
+              </div>
+            </nav>
+          </header>
+        <header class="main-header" id="header">
+            <!-- Copy the header (top nav) structure from index.html here -->
+        </header>
+
+        <div class="container mt-5">
+            <h1 class="text-center">Kaikki Reseptit</h1>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <input type="text" id="search-input" class="form-control" placeholder="Etsi ainesosalla tai avainsanalla...">
+                </div>
+            </div>
+            <div class="row">
+                <div id="recipe-list" class="card-deck">
+                    <!-- Recipes will be listed here -->
+                </div>
+            </div>
+        </div>
+        
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="plugins/simplebar/simplebar.min.js"></script>
+    <script src="js/mono.js"></script> 
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('search-input').addEventListener('input', function() {
+                currentPage = 1; // Reset to the first page on new search
+                const searchQuery = this.value.trim().toLowerCase();
+                fetchRecipes(searchQuery);
+            });
+        
+            document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
+            document.getElementById('nextPage').addEventListener('click', () => changePage(1));
+        
+            // Fetch and display all recipes when the page first loads
+            fetchRecipes();
+        });
+        
+        async function fetchRecipes(searchQuery = '') {
+    try {
+        const response = await fetch('https://funny-cuchufli-a98cc3.netlify.app/.netlify/functions/reseptit');
+        if (!response.ok) {
+            throw new Error('Failed to fetch recipes');
+        }
+        let recipes = await response.json();
+        
+        // Filter recipes to only include those with visibility set to 'public'
+        //recipes = recipes.filter(recipe => recipe.visibility === 'public');
+
+        // Check if the user is signed in
+        const userSignedIn = sessionStorage.getItem('loggedIn');
+
+        // Filter recipes based on visibility
+        if (!userSignedIn) {
+            // If the user is not signed in, filter recipes to only include those with visibility set to 'public'
+            recipes = recipes.filter(recipe => recipe.visibility === 'public');
+        }
+        
+        if (searchQuery) {
+            recipes = recipes.filter(recipe =>
+                recipe.ingredients.toLowerCase().includes(searchQuery) ||
+                recipe.keywords.toLowerCase().includes(searchQuery) ||
+                recipe.title.toLowerCase().includes(searchQuery)
+            );
+        }
+
+        updatePagination(recipes.length);
+        displayRecipes(recipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+    } catch (error) {
+        console.error('Error fetching recipes:', error);
+        document.getElementById('recipe-list').innerHTML = '<p class="text-center w-100">Failed to load recipes.</p>';
+    }
+}
+        
+        function displayRecipes(recipes) {
+            const recipeList = document.getElementById('recipe-list');
+            recipeList.innerHTML = recipes.length ? '' : '<p class="text-center">Ei reseptejä löytynyt.</p>';
+        
+            const row = document.createElement('div');
+            row.className = 'row justify-content-center';
+            recipes.forEach(recipe => {
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-4 d-flex align-items-stretch';
+                
+                const card = `
+                    <div class="card w-100">
+                        <img src="${recipe.image_url || 'fallback-image-url.jpg'}" class="card-img-top recipe-card-image" alt="${recipe.title}">
+                        <div class="card-body">
+                            <h5 class="card-title">${recipe.title}</h5>
+                            <p class="card-text">Ainesosat: ${recipe.ingredients.split(',').join('<br>')}</p>
+                            <a href="/recipe-details.html?_id=${recipe._id}" class="btn btn-primary">Näytä resepti</a>
+                        </div>
+                    </div>
+                `;
+                col.innerHTML = card;
+                row.appendChild(col);
+            });
+            recipeList.appendChild(row);
+        }
+        
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            document.getElementById('paginationInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages || totalItems === 0;
+        }
+        
+        function changePage(number) {
+            currentPage += number;
+            const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+            fetchRecipes(searchQuery);
+        }
+        </script>
+<div class="mt-4 d-flex justify-content-center align-items-center">
+    <button id="prevPage" class="btn btn-secondary mx-2">Edellinen</button>
+    <span id="paginationInfo">Sivu 1</span>
+    <button id="nextPage" class="btn btn-secondary mx-2">Seuraava</button>
+</div>
+</div>
+</body>
+</html>

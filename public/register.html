@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekisteröidy</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link href="data:image/x-icon;base64,AAABAAEAEBAAAAEACABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAAeJ2nACRBbwB3hnUAC06fADVrdwAUi/EAKbT2AAFrpQAAVskAOmjrAAAkWQAcSEYABlfDAFiZZwALsPQAFXnXACik0AACZ8YAAGrGAAdClwAWYq4ADFCCAEp6dwARarQAD5TgACAxkQAPlOkAAAATAHGssQBQgdwAfoB/ACtFcwAbb7oAHpHgABF0yQCChXMADH/PAA9WTQAMHkgABV27AChpwwADN0IAFCE/ABhllABR0fMAFH7eACA8awAkKiQAG4fVAAxCoQAbZ6wABlaVAElgTwBGeJYAMo9DABBbiQAOTacAUfP2AAQAFAAPT6QAVlleAFHdxwAfVIYAGTRmAAwdRgAWdc0AsNrOAD9EcQALY8UAVYGxACulLAAPVoQAE1KBACBxlQANTZYABHXXABBSkwA2bdkAFKbiAARfugB9o8UAO5ivAC6bygAinCQAO3mAAICkyAAahcgAG37XAG6iqAAJVIgASX93ACeo6AAqRFgAttHqAAA+YgAAM3cACpH1ACtRtABJVGwAHbr6AGFpfQAKeckAgoZ5AByn1AAVfs8APnuQAA2S3gAAUrAAGpDYAEd3nwAWZMoACAAOABlQjwB6n8QAs8nLAITAhQADCB0ACIfZABRWswAKQooAQPLuABZmQgCu0ewABmTLABiB2QANZr8ACUWcAAdPlgCfydUAQHxEAB5jtgALNW0ADZvxABy+/wANbOMAFHnUAD51gAAmqNAAFGClAEBYTgABZc8AB2bAAAdjyQAEZ8wAEQ0tAAkSPAALl+8AGREeABVpyQANqe8APGmKACh3ogAdnOMArODKACuBpQALX9AAtNLoAERxmQASZsEAFEaPADxjggAGABEAFk+YADxofwAWl/kAF3DWAIWcvgAZWZsAOE1uAAxHgQAYRG8AAjpSAAdmywAeetkACWfFABNDhwALZcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHMBl0lIgDOhWYEAAAAAAEQaYqg4FloVV1ObBQAAAKkLhJKRO6JwlCtAmEqkAABBJxwwNYw9ZRcdUmovAgAAdYlbglRHNzqKEWhPLV0AZwx5PnomX2AEMilOCh5jJANVLHg0CCWHrTFvnHx/IB90KhRFI0xhGw+GmVwTlauaDqx3rhIGpZNrhRlkIrE/QwA2OY8oiEKvLn12lgdsRgAAnaCDjlAQjaaQaW1mo14AAAB7sEshfg0JWBiLcQAAAAAAAABRbqo8n02epwAAAAAAAAAAAAAAVnIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AADgBwAAwAMAAIABAACAAQAAgAEAAAAAAAAAAAAAAAAAAAAAAACAAQAAgAEAAMAHAADwDwAA/n8AAP//AAA=" rel="icon" type="image/x-icon">
+
+</head>
+<body>
+    <div id="register-page">
+        <h2><a href="index.html" id="back">Takaisin</a></h2>
+        <div id="register-app">
+            <form id="register">
+                <label for="fullname">Koko nimi:</label><br>
+                <input type="text" id="fullname" name="fullname" required><br>
+                <label for="email">Sähköposti:</label><br>
+                <input type="text" id="email" name="email" required><br>
+                <label for="password">Salasana:</label><br>
+                <input type="password" id="password" name="password" required><br><br>
+
+                <label for="confirmPassword">Varmista salasana:</label><br>
+                <input type="password" id="confirmPassword" name="confirmPassword" required><br><br>
+        
+                <input type="submit" value="Rekisteröidy">
+                <h5><a href="login.html" id="login-text">Onko sinulla jo tili? Kirjaudu sisään</a></h5>
+            </form>
+            <img src="/images/Logo.png" id="SafkaShare-pieni-logo">
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("register").onsubmit = async function(event) {
+    // Prevent the form from submitting and reloading the page
+    event.preventDefault();
+
+    var fullName = document.getElementById("fullname").value;
+    var email = document.getElementById("email").value;
+    var password = document.getElementById("password").value;
+    var confirmPassword = document.getElementById("confirmPassword").value;
+
+    // Password validation
+    if (password !== confirmPassword) {
+        alert("Salasanat eivät täsmää!");
+        return;
+    }
+
+    try {
+        const users = await fetchUsers();
+        const emailExists = checkEmailExists(users, email);
+        if (emailExists) {
+            alert("Sähköpostiosoite on jo käytössä");
+            return;
+        } else {
+            const response = await addUserToDatabase(fullName, email, password);
+            if (response && response.ok) {
+                alert("Rekisteröinti onnistui!");
+                sessionStorage.setItem('loggedIn', true);
+                sessionStorage.setItem('full_name', fullName);
+                sessionStorage.setItem('email', email);
+                sessionStorage.setItem('user_type', "user");
+                window.location.href = "index.html"; // Move redirection here
+            } else {
+                throw new Error("Failed to add user to database");
+            }
+        }
+    } catch (error) {
+        console.error('An error occurred:', error);
+        //alert("Virhe rekisteröinnissä. Yritä myöhemmin uudelleen.");
+        alert("Käyttäjä luotu, Kirjaudu sisään");
+        window.location.href = "login.html"; // Move redirection here
+    }
+};
+
+async function fetchUsers() {
+    try {
+        const response = await fetch('https://funny-cuchufli-a98cc3.netlify.app/.netlify/functions/kirjaudu');
+        if (!response.ok) {
+            throw new Error('Failed to fetch users');
+        }
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
+function checkEmailExists(users, email) {
+    return users.some(user => user.email === email);
+}
+
+async function addUserToDatabase(fullName, email, password) {
+    try {
+        const response = await fetch('https://funny-cuchufli-a98cc3.netlify.app/.netlify/functions/register', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                full_name: fullName,
+                email: email,
+                password: password,
+                user_type: "user", 
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to add user to database");
+        }
+
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+    </script>
+</body>
+</html>

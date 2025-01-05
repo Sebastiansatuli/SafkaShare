@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafkaShare Admin</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Karla:400,700|Roboto" rel="stylesheet">
+    <link href="plugins/material/css/materialdesignicons.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet">
+    <!-- Add any additional CSS for sidebar and top nav if needed -->
+    <style>
+        .recipe-card-image {
+            max-width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: .25rem .25rem 0 0;
+        }
+    
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            min-width: 200px;
+        }
+    
+        .card-body {
+            text-align: center;
+        }
+    
+        /* Ensure the container doesn't exceed the max width but is centered */
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+    
+        #recipe-list .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+    
+        #recipe-list .col-md-4 {
+            display: flex;
+            flex: 1 0 33%; /* Default to three columns */
+            max-width: 33%; /* Default to three columns */
+        }
+    
+        @media (max-width: 768px) {
+            #recipe-list .col-md-4 {
+                flex-basis: 50%; /* Two columns for smaller screens */
+                max-width: 50%;
+            }
+        }
+    
+        @media (max-width: 576px) {
+            #recipe-list .col-md-4 {
+                flex-basis: 100%; /* Full width for extra small screens */
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body id="body">
+    <!-- Page Content -->
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header class="main-header" id="header">
+            <nav class="navbar navbar-expand-lg navbar-light" id="navbar">
+                <!-- Sidebar toggle button -->
+                <button id="sidebar-toggler" class="sidebar-toggle">
+                    <span class="sr-only">Toggle navigation</span>
+                </button>
+
+                <span class="page-title">Käyttäjien Hallinta</span>
+
+                <div class="navbar-right ">
+
+                    <div>
+                        <form action="index.html" method="get">
+                            <div class="input-group input-group-sm" id="input-group-search">
+
+                            </div>
+                        </form>
+                    </div>
+
+                    <ul class="nav navbar-nav">
+                        <li class="dropdown user-menu">
+                            <button class="button nav-link" style="visibility: hidden;" id="logoutButton" disabled="true">Kirjaudu ulos</button>
+                            <button class="button nav-link" id="loginButton">
+                                <span class="d-none d-lg-inline-block" id="userLabel">Kirjaudu sisään</span>
+
+                            </button>
+                        </li>
+                    </ul>
+                    <script>
+                        // Your JavaScript code for user authentication and session management
+                    </script>
+                </div>
+            </nav>
+        </header>
+
+        <div class="container mt-5">
+            <h1 class="text-center">Kaikki Käyttäjät</h1>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <input type="text" id="search-input" class="form-control" placeholder="Etsi käyttäjä">
+                </div>
+            </div>
+            <div class="row">
+                <div id="user-list" class="card-deck">
+                    <!-- Users will be listed here -->
+                </div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+        <script src="plugins/simplebar/simplebar.min.js"></script>
+        <script src="js/mono.js"></script>
+        <script>
+            let currentPage = 1;
+            const itemsPerPage = 10;
+
+            document.addEventListener('DOMContentLoaded', function() {
+                var storedName = sessionStorage.getItem('full_name');
+                var storedRole = sessionStorage.getItem('user_type');
+
+            if (storedName && storedRole === 'admin') {
+                document.getElementById('loginButton').disabled = true;
+                document.getElementById('loginButton').style = "color: black;";
+                document.getElementById('logoutButton').disabled = false;
+                document.getElementById('logoutButton').style = "visibility: visible; color: red;";
+                document.getElementById('userLabel').textContent = storedName;
+            } else {
+                document.getElementById('loginButton').disabled = false;
+                document.getElementById('logoutButton').disabled = true;
+                document.getElementById('logoutButton').style = "visibility: hidden;";
+                document.getElementById('userLabel').textContent = "Kirjaudu sisään";
+                window.location.href = 'login.html';
+            }
+            document.getElementById('search-input').addEventListener('input', function() {
+                    currentPage = 1; // Reset to the first page on new search
+                    const searchQuery = this.value.trim().toLowerCase();
+                    fetchUsers(searchQuery);
+                });
+
+                document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
+                document.getElementById('nextPage').addEventListener('click', () => changePage(1));
+
+                // Fetch and display all users when the page first loads
+                fetchUsers();
+            });
+
+            async function fetchUsers(searchQuery = '') {
+                try {
+                    const response = await fetch('https://funny-cuchufli-a98cc3.netlify.app/.netlify/functions/kirjaudu');
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`);
+                    }
+                    let users = await response.json();
+
+                    if (searchQuery) {
+                        users = users.filter(user =>
+                            user.full_name.toLowerCase().includes(searchQuery) ||
+                            user.email.toLowerCase().includes(searchQuery)
+                        );
+                    }
+
+                    updatePagination(users.length);
+                    displayUsers(users.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+                } catch (error) {
+                    console.error('Error fetching users:', error);
+                    document.getElementById('user-list').innerHTML = `<p class="text-center w-100">${error.message}</p>`;
+                }
+            }
+
+            function displayUsers(users) {
+                const userList = document.getElementById('user-list');
+                userList.innerHTML = users.length ? '' : '<p class="text-center">Ei käyttäjiä löytynyt.</p>';
+
+                const row = document.createElement('div');
+                row.className = 'row justify-content-center';
+                users.forEach(user => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-4 mb-4 d-flex align-items-stretch';
+
+                    const card = `
+                        <div class="card w-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${user.full_name}</h5>
+                                <p class="card-text">Email: ${user.email}</p>
+                                <button class="btn btn-danger delete-button" data-user-id="${user._id}">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    col.innerHTML = card;
+                    row.appendChild(col);
+                });
+                userList.appendChild(row);
+
+                // Attach event listeners for delete buttons
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const userId = button.getAttribute('data-user-id');
+                        try {
+                            const response = await fetch(`https://funny-cuchufli-a98cc3.netlify.app/.netlify/functions/DeleteUser/${userId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                 },
+                                body: JSON.stringify(userId)
+                            });
+                            if (response.ok) {
+                                // User deleted successfully
+                                //button.closest('.col-md-4').remove();
+                                window.location.href = "admin.html";
+                            } else {
+                                // Handle server-side errors
+                                const errorMessage = await response.text();
+                                throw new Error(`Failed to delete user: ${errorMessage}`);
+                            }
+                        } catch (error) {
+                            console.error('Error deleting user:', error);
+                            alert(error.message); // Display detailed error message to the user
+                        }
+                    });
+                });
+            }
+
+            function updatePagination(totalItems) {
+                const totalPages = Math.ceil(totalItems / itemsPerPage);
+                document.getElementById('paginationInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+                document.getElementById('prevPage').disabled = currentPage === 1;
+                document.getElementById('nextPage').disabled = currentPage === totalPages || totalItems === 0;
+            }
+
+            function changePage(number) {
+                currentPage += number;
+                const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+                fetchUsers(searchQuery);
+            }
+        </script>
+        <div class="mt-4 d-flex justify-content-center align-items-center">
+            <button id="prevPage" class="btn btn-secondary mx-2">Previous</button>
+            <span id="paginationInfo">Page 1</span>
+            <button id="nextPage" class="btn btn-secondary mx-2">Next</button>
+        </div>
+    </div>
+</body>
+</html>
